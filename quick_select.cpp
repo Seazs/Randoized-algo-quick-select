@@ -7,11 +7,15 @@
 #include <random>
 using namespace std;
 
+#define max(a, b) (a > b ? a : b)
+#define min(a, b) (a < b ? a : b)
+
 int quick_select_comparison_count = 0;
 
 int quick_select(vector<int>& arr, int k);
 int lazy_select(vector<int>& arr, int k);
 int quick_sort(vector<int>& arr, int l, int r);
+
 
 int main(){
     //quick_select_benchmark();
@@ -78,7 +82,7 @@ int quick_select(vector<int>& arr, int k){
 
 int lazy_select(vector<int>& arr, int k){
     int n = arr.size();
-    // pick n^3/4 elements at random and sort them
+    // 1. pick n^3/4 elements at random
     int sample_size = pow(n, 3.0/4.0);
     vector<int> randomSample;
     std::mt19937 generator(time(0)); // Random number generator
@@ -94,8 +98,53 @@ int lazy_select(vector<int>& arr, int k){
     }
     cout << endl; */
     
-    // sort the sample using quick sort
+    // 2. sort the sample using quick sort
     quick_sort(randomSample, 0, sample_size - 1);
+
+    // 3.
+    
+    double x = k*pow(n, -1.0/4.0);
+    int l = max(1, floor(x - sqrt(n)));
+    int h = min(sample_size, ceil(x + sqrt(n)));
+
+    int a = randomSample[l];
+    int b = randomSample[h];
+
+    // compute the rank of a and b by comparing them to all the element of arr
+    int rank_a = 0;
+    int rank_b = 0;
+    // complexity : O(n) for this and we try to achieve O(n) for the whole algorithm so it's ok
+    for(int i = 0; i < n; i++){
+        if(arr[i] < a){
+            rank_a++;
+        }
+        if(arr[i] < b){
+            rank_b++;
+        }
+    }
+
+    // 4. Find in wich interval the kth smallest element is (< n^1/4, > n-n^1/4, in between)
+    vector<int> new_sample;
+    if (k < pow(n, 1.0/4.0)){
+        for(int i; i <= b, i++){
+            new_sample.push_back(i);
+        }
+    }
+    else if (k > n - pow(n, 1.0/4.0)){
+        for(int i; i >= a, i--){
+            new_sample.push_back(i);
+        }
+    }
+    else{
+        for(int i = a; i <= b; i++){
+            new_sample.push_back(i);
+        }
+    }
+
+    //Check whether S(k) is in P and |P|  <= 4n^3/4 + 2. If not, repeat Steps 1-3 until such set P is found.
+    
+    
+
 
     return 0;
 }
