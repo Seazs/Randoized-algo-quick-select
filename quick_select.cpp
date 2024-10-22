@@ -34,12 +34,15 @@ int quick_select_benchmark(){
     for(int i = 1; i <= 10000; i += 100){
         sizes.push_back(i);
     }
-    vector<int> k_values = {1, 5, 10, 50, 500}; // Different k values
-
-    ofstream outfile("results.csv");
+    ofstream outfile("Quick_results.csv");
     outfile << "ArraySize,K,Comparisons\n";
 
     for(int size : sizes){
+        vector<int> k_values;
+        for(int i = 1; i <= 10; i++){
+            k_values.push_back(size * i / 10); // k values as ratios of size
+        }
+
         for(int k : k_values){
             vector<int> arr(size);
             for(int i = 0; i < size; i++){
@@ -49,7 +52,6 @@ int quick_select_benchmark(){
             quick_select(arr, k);
             outfile << size << "," << k << "," << quick_select_comparison_count << "\n";
             // print array
-        
         }
     }
     outfile.close();
@@ -61,12 +63,15 @@ int lazy_select_benchmark(){
     for(int i = 1; i <= 10000; i += 100){
         sizes.push_back(i);
     }
-    vector<int> k_values = {1, 5, 10, 50, 500}; // Different k values
-
-    ofstream outfile("results.csv");
+    ofstream outfile("Lazy_results.csv");
     outfile << "ArraySize,K,Comparisons\n";
 
     for(int size : sizes){
+        vector<int> k_values;
+        for(int i = 1; i <= 10; i++){
+            k_values.push_back(size * i / 10); // k values as ratios of size
+        }
+
         for(int k : k_values){
             vector<int> arr(size);
             for(int i = 0; i < size; i++){
@@ -76,7 +81,6 @@ int lazy_select_benchmark(){
             lazy_select(arr, k);
             outfile << size << "," << k << "," << lazy_select_comparison_count << "\n";
             // print array
-        
         }
     }
     outfile.close();
