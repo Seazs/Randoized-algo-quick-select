@@ -11,17 +11,21 @@ using namespace std;
 #define min(a, b) (a < b ? a : b)
 
 int quick_select_comparison_count = 0;
+int lazy_select_comparison_count = 0;
+
+int quick_select_benchmark();
+int lazy_select_benchmark();
 
 int quick_select(vector<int>& arr, int k);
 int lazy_select(vector<int>& arr, int k);
 int quick_sort(vector<int>& arr, int l, int r);
 
 
+
 int main(){
-    //quick_select_benchmark();
-    vector<int> arr = {3, 2, 1, 5, 4, 10, 24, 245, 1, 234};
-    lazy_select(arr, 3);
+    lazy_select_benchmark();
     return 0;
+    
 
 }
 
@@ -44,6 +48,33 @@ int quick_select_benchmark(){
             quick_select_comparison_count = 0; // Reset comparison count
             quick_select(arr, k);
             outfile << size << "," << k << "," << quick_select_comparison_count << "\n";
+            // print array
+        
+        }
+    }
+    outfile.close();
+    return 0;
+}
+
+int lazy_select_benchmark(){
+    vector<int> sizes;
+    for(int i = 1; i <= 10000; i += 100){
+        sizes.push_back(i);
+    }
+    vector<int> k_values = {1, 5, 10, 50, 500}; // Different k values
+
+    ofstream outfile("results.csv");
+    outfile << "ArraySize,K,Comparisons\n";
+
+    for(int size : sizes){
+        for(int k : k_values){
+            vector<int> arr(size);
+            for(int i = 0; i < size; i++){
+                arr[i] = rand() % 10000; // Fill array with random values
+            }
+            lazy_select_comparison_count = 0; // Reset comparison count
+            lazy_select(arr, k);
+            outfile << size << "," << k << "," << lazy_select_comparison_count << "\n";
             // print array
         
         }
@@ -80,70 +111,90 @@ int quick_select(vector<int>& arr, int k){
 }
 
 
-int lazy_select(vector<int>& arr, int k){
+
+// Lazy Select Function
+int lazy_select(vector<int>& arr, int k) {
     int n = arr.size();
-    // 1. pick n^3/4 elements at random
-    int sample_size = pow(n, 3.0/4.0);
-    vector<int> randomSample;
-    std::mt19937 generator(time(0)); // Random number generator
-    std::uniform_int_distribution<int> distribution(0, sample_size-1); // Random number generator using uniform distribution
-
-    for (int i = 0; i < sample_size; i++){
-        int index = distribution(generator);
-        randomSample.push_back(arr[index]);
+    if (k > n || k < 1) {
+        return -1; // k is out of valid index range
     }
 
-    
-    // 2. sort the sample using quick sort
-    quick_sort(randomSample, 0, sample_size - 1);
+    int sample_size = pow(n, 3.0 / 4.0); // Size of the random sample
 
-    // 3.
-    
-    double x = k*pow(n, -1.0/4.0);
-    int l = max(1, floor(x - sqrt(n)));
-    int h = min(sample_size, ceil(x + sqrt(n)));
+    while (true) {
+        // 1. Select a random sample
+        vector<int> randomSample;
+        random_device rd;
+        mt19937 generator(rd());
+        uniform_int_distribution<int> distribution(0, n - 1);
 
-    int a = randomSample[l];
-    int b = randomSample[h];
-
-    // compute the rank of a and b by comparing them to all the element of arr
-    int rank_a = 0;
-    int rank_b = 0;
-    for(int i = 0; i < n; i++){
-        if(arr[i] < a){
-            rank_a++;
+        for (int i = 0; i < sample_size; i++) {
+            int index = distribution(generator);
+            randomSample.push_back(arr[index]);
         }
-        if(arr[i] < b){
-            rank_b++;
+
+        // 2. Sort the sample
+        quick_sort(randomSample, 0, sample_size - 1);
+
+        // 3. Determine a and b, the bounds of the interval containing the k-th element
+        double x = k*pow(n, -1.0/4.0);
+        int l = max(1, floor(x - sqrt(n)));
+        int h = min(sample_size, ceil(x + sqrt(n)));
+
+        int a = randomSample[l - 1]; // Lower bound
+        int b = randomSample[h - 1]; // Upper bound
+
+        // Compute the rank of a and b in the original array
+        int rank_a = 1, rank_b = 1;
+        for (int i = 0; i < n; i++) {
+            if (arr[i] < a) rank_a++;
+            if (arr[i] < b) rank_b++;
+        }
+
+        // 4. Select the relevant elements for P
+        vector<int> P;
+        int type;
+        if (k < pow(n, 1.0 / 4.0)) {
+            for (int y : arr) {
+                if (y <= b) P.push_back(y);
+                type = 1;
+            }
+        } else if (k > n - pow(n, 1.0 / 4.0)) {
+            for (int y : arr) {
+                if (y >= a) P.push_back(y);
+                type = 2;
+            }
+        } else {
+            // Otherwise, k is in between
+            for (int y : arr) {
+                if (y >= a && y <= b) P.push_back(y);
+                type = 3;
+            }
+        }
+
+        // 5. Check the size of P and if S(k) is in P
+        if (P.size() <= 4 * pow(n, 3.0 / 4.0) + 2) {
+            quick_sort(P, 0, P.size() - 1);
+            int index = k - rank_a; // Adjusted index to find the k-th element
+            index = max(0, index); // Ensure index is not negative
+            switch (type) {
+                case 1:
+                    if (k >= rank_a) return P[index];
+                    break;
+                case 2:
+                    if (k <= rank_b) return P[index];
+                    break;
+                case 3:
+                    if (k >= rank_a && k <= rank_b) return P[index];
+                    break;
+                default:
+                    break;
+            }
         }
     }
-
-    // 4. Find in wich interval the kth smallest element is (< n^1/4, > n-n^1/4, in between)
-    vector<int> new_sample;
-    if (k < pow(n, 1.0/4.0)){
-        for(int i; i <= b; i++){
-            new_sample.push_back(i);
-        }
-        
-    }
-    else if (k > n - pow(n, 1.0/4.0)){
-        for(int i; i >= a; i--){
-            new_sample.push_back(i);
-        }
-    }
-    else{
-        for(int i = a; i <= b; i++){
-            new_sample.push_back(i);
-        }
-    }
-
-    //Check whether S(k) is in P and |P|  <= 4n^3/4 + 2. If not, repeat Steps 1-3 until such set P is found.
-    // to check if S(k) is in P, we can simply check if k is 
-    
-
-
-    return 0;
+    return -1; // For safety (this should not happen)
 }
+
 
 
 int quick_sort(vector<int>& arr, int l, int r){
@@ -151,6 +202,7 @@ int quick_sort(vector<int>& arr, int l, int r){
         int pivot = arr[r];
         int i = l;
         for(int j = l; j < r; j++){
+            lazy_select_comparison_count++; // Increment comparison count
             if(arr[j] < pivot){
                 swap(arr[i], arr[j]);
                 i++;
