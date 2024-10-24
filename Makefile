@@ -6,6 +6,7 @@ OBJS := $(SRCS:.cpp=.o)
 TARGET = myprogram
 
 all: $(TARGET)
+	./$(TARGET)  # Run the application after building
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $^ -o $@

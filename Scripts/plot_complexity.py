@@ -5,36 +5,81 @@ import pandas as pd
 import numpy as np
 
 
+def main():
+    # Get the file path from command line argument
+    file_path = sys.argv[1]
+    plot_lazy_data(file_path)
+
+
 # Define the function
-def theoretical_complexity(n, k):
+def quick_select_theoretical_complexity(n, k):
     # this function retrun the teritical complexity of quickSelect algorithm
     return 2 * n + 2 * k * np.log((n-k) / k) + 2 * n * np.log(n / (n - k))
 
+def lazy_complexity(n, k):
+    
 
-# Get the file path from command line argument
-file_path = sys.argv[1]
 
-# Read the results from the CSV file
-df = pd.read_csv(file_path)
+def plot_quick_select_data(file_path):
+    # Read the results from the CSV file
+    df = pd.read_csv(file_path)
 
-# Plot the results
-plt.figure(figsize=(12, 6))
+    # Plot the results
+    plt.figure(figsize=(12, 6))
 
-for k in df['K'].unique():
-    subset = df[df['K'] == k]
-    plt.figure(figsize=(12, 6))  # Create a new figure for each k value
-    plt.plot(subset['ArraySize'], subset['Comparisons'], label=f'k={k}')
+    k_values = ["1", "1/4", "1/2", "3/4", "4/4"]
+    for k in k_values:
+        subset = df[df['K'] == k]
+        plt.figure(figsize=(12, 6))  # Create a new figure for each k value
+        plt.plot(subset['ArraySize'], subset['Comparisons'], label=f'k={k}')
 
-    # Compute theoretical complexity
-    n_values = subset['ArraySize']
-    theoretical_values = theoretical_complexity(n_values, k)
-    plt.plot(n_values, theoretical_values, label=f'k={k} (theoretical)', linestyle='--')
+        # Compute theoretical complexity
+        n_values = subset['ArraySize']
+        k_values = n_values * eval(k)
 
-    plt.xlabel('Array Size')
-    plt.ylabel('Number of Comparisons')
-    plt.title(f'Quick Select Comparison Count vs Array Size (k={k})')
-    plt.legend()
-    plt.grid(True)
-    plt.axis('equal')  # Set the axes to have the same scale
-    plt.show()
+        theoretical_values = quick_select_theoretical_complexity(n_values, k_values)
+        plt.plot(n_values, theoretical_values, label=f'k={k} (theoretical)', linestyle='--')
 
+        plt.xlabel('Array Size')
+        plt.ylabel('Number of Comparisons')
+        plt.title(f'Quick Select Comparison Count vs Array Size (k={k})')
+        plt.legend()
+        plt.grid(True)
+        plt.axis('equal')  # Set the axes to have the same scale
+        plt.show()
+
+
+def plot_lazy_data(file_path):
+    # Read the results from the CSV file
+    df = pd.read_csv(file_path)
+
+    # Plot the results
+    plt.figure(figsize=(12, 6))
+
+    k_values = ["1", "1/4", "1/2", "3/4", "4/4"]
+    for k in k_values:
+        subset = df[df['K'] == k]
+        plt.figure(figsize=(12, 6))  # Create a new figure for each k value
+        plt.plot(subset['ArraySize'], subset['Comparisons'], label=f'k={k}')
+
+        # Compute theoretical complexity
+        n_values = subset['ArraySize']
+        k_values = n_values * eval(k)
+        print(n_values)
+        print("------")
+        print(k_values)
+        theoretical_values = lazy_complexity(n_values, k_values)
+        plt.plot(n_values, theoretical_values, label=f'k={k} (theoretical)', linestyle='--')
+
+        plt.xlabel('Array Size')
+        plt.ylabel('Number of Comparisons')
+        plt.title(f'Quick Select Comparison Count vs Array Size (k={k})')
+        plt.legend()
+        plt.grid(True)
+        plt.axis('equal')  # Set the axes to have the same scale
+        plt.show()
+
+
+
+if __name__ == "__main__":
+    main()

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <string.h>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
@@ -19,10 +20,16 @@ int lazy_select_benchmark();
 int quick_select(vector<int>& arr, int k);
 int lazy_select(vector<int>& arr, int k);
 int quick_sort(vector<int>& arr, int l, int r);
+string get_kvalue_text(int k);
 
 
 
 int main(){
+
+    // vector<int> my_array = {1, 23, 434, 500, 723, 1230, 1584, 4323, 9321, 9876};
+    // int k = 10;
+    // cout << "Quick Select: " << quick_select(my_array, k) << endl;
+
     lazy_select_benchmark();
     return 0;
     
@@ -67,24 +74,25 @@ int lazy_select_benchmark(){
     outfile << "ArraySize,K,Comparisons\n";
 
     for(int size : sizes){
-        vector<int> k_values;
-        for(int i = 1; i <= 10; i++){
-            k_values.push_back(size * i / 10); // k values as ratios of size
-        }
+        vector<int> k_values = {1, size / 4, size / 2, 3 * size / 4, size-1}; // k values as ratios of size
+        vector<string> k_labels = {"1", "1/4", "1/2", "3/4", "4/4"}; // Corresponding labels
 
-        for(int k : k_values){
+        for(size_t i = 0; i < k_values.size(); i++){
+            int k = k_values[i];
+            string k_label = k_labels[i];
             vector<int> arr(size);
-            for(int i = 0; i < size; i++){
-                arr[i] = rand() % 10000; // Fill array with random values
+            for(int j = 0; j < size; j++){
+                arr[j] = rand() % 10000; // Fill array with random values
             }
             lazy_select_comparison_count = 0; // Reset comparison count
             lazy_select(arr, k);
-            outfile << size << "," << k << "," << lazy_select_comparison_count << "\n";
+            outfile << size << "," << k_label << "," << lazy_select_comparison_count << "\n";
             // print array
         }
     }
     outfile.close();
     return 0;
+    
 }
 
 int quick_select(vector<int>& arr, int k){
@@ -151,8 +159,8 @@ int lazy_select(vector<int>& arr, int k) {
         // Compute the rank of a and b in the original array
         int rank_a = 1, rank_b = 1;
         for (int i = 0; i < n; i++) {
-            if (arr[i] < a) rank_a++;
-            if (arr[i] < b) rank_b++;
+            if (arr[i] < a) rank_a++; // we use < because we want rank_a to be smallest element in the case where we have multiple
+            if (arr[i] <= b) rank_b++; // we use <= because we want rank_b to be the highest element in the case where we have multiple 
         }
 
         // 4. Select the relevant elements for P
@@ -178,6 +186,20 @@ int lazy_select(vector<int>& arr, int k) {
 
         // 5. Check the size of P and if S(k) is in P
         if (P.size() <= 4 * pow(n, 3.0 / 4.0) + 2) {
+            // print all type of information
+            // cout << "n: " << n << endl;
+            // cout << "k: " << k << endl;
+            // cout << "a: " << a << endl;
+            // cout << "b: " << b << endl;
+            // cout << "rank_a: " << rank_a << endl;
+            // cout << "rank_b: " << rank_b << endl;
+            // cout << "P: ";
+            // for (int i : P) {
+            //     cout << i << " ";
+            // }
+            // cout << endl;
+            // cout << "Type: " << type << endl;
+
             quick_sort(P, 0, P.size() - 1);
             int index = k - rank_a; // Adjusted index to find the k-th element
             index = max(0, index); // Ensure index is not negative
