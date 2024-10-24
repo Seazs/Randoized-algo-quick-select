@@ -43,65 +43,38 @@ int lazy_select(vector<int>& arr, int k) {
         int b = randomSample[h - 1]; // Upper bound
 
         // Compute the rank of a and b in the original array
-        int rank_a = 1, rank_b = 1;
+        // Initialize rank_a and rank_b to 1 because we want the k-th to be the element of index k - 1 
+        // (for exemple, if k = 1, we want the first element of the array)
+        int rank_a = 1, rank_b = 1; 
         for (int i = 0; i < n; i++) {
-            if (arr[i] < a) rank_a++; // we use < because we want rank_a to be smallest element in the case where we have multiple
-            if (arr[i] <= b) rank_b++; // we use <= because we want rank_b to be the highest element in the case where we have multiple 
+            if (arr[i] < a) rank_a++; // we use < because we want rank_a to be smallest element in the case where we have multiple of the same element
+            if (arr[i] <= b) rank_b++; // we use <= because we want rank_b to be the highest element in the case where we have multiple of the same element
         }
 
         // 4. Select the relevant elements for P
         vector<int> P;
         int type;
+        // Determine the type of P
         if (k < pow(n, 1.0 / 4.0)) {
             for (int y : arr) {
                 if (y <= b) P.push_back(y);
-                type = 1;
             }
         } else if (k > n - pow(n, 1.0 / 4.0)) {
             for (int y : arr) {
                 if (y >= a) P.push_back(y);
-                type = 2;
             }
         } else {
-            // Otherwise, k is in between
             for (int y : arr) {
                 if (y >= a && y <= b) P.push_back(y);
-                type = 3;
             }
         }
 
-        // 5. Check the size of P and if S(k) is in P
+        // 5. Check the size of P and if S(k) is in P (all the if statements are to check if the k-th element is in P)
         if (P.size() <= 4 * pow(n, 3.0 / 4.0) + 2) {
-            // print all type of information
-            // cout << "n: " << n << endl;
-            // cout << "k: " << k << endl;
-            // cout << "a: " << a << endl;
-            // cout << "b: " << b << endl;
-            // cout << "rank_a: " << rank_a << endl;
-            // cout << "rank_b: " << rank_b << endl;
-            // cout << "P: ";
-            // for (int i : P) {
-            //     cout << i << " ";
-            // }
-            // cout << endl;
-            // cout << "Type: " << type << endl;
-
             quick_sort(P, 0, P.size() - 1);
             int index = k - rank_a; // Adjusted index to find the k-th element
             index = max(0, index); // Ensure index is not negative
-            switch (type) {
-                case 1:
-                    if (k >= rank_a) return P[index];
-                    break;
-                case 2:
-                    if (k <= rank_b) return P[index];
-                    break;
-                case 3:
-                    if (k >= rank_a && k <= rank_b) return P[index];
-                    break;
-                default:
-                    break;
-            }
+            return P[index];
         }
     }
     return -1; // For safety (this should not happen)
