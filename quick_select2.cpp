@@ -6,6 +6,8 @@
 #include <ctime>
 #include <cmath>
 #include <random>
+#include <chrono>
+
 using namespace std;
 
 #define max(a, b) (a > b ? a : b)
@@ -29,35 +31,42 @@ int main(){
     // vector<int> my_array = {1, 23, 434, 500, 723, 1230, 1584, 4323, 9321, 9876};
     // int k = 10;
     // cout << "Quick Select: " << quick_select(my_array, k) << endl;
-
+    quick_select_benchmark();
     lazy_select_benchmark();
     return 0;
     
 
 }
 
+
 int quick_select_benchmark(){
     vector<int> sizes;
-    for(int i = 1; i <= 10000; i += 100){
+    for(int i = 1000; i <= 500000; i += 1000){
         sizes.push_back(i);
     }
     ofstream outfile("Quick_results.csv");
-    outfile << "ArraySize,K,Comparisons\n";
+    outfile << "ArraySize,K,Comparisons,Time\n";
 
     for(int size : sizes){
-        vector<int> k_values;
-        for(int i = 1; i <= 10; i++){
-            k_values.push_back(size * i / 10); // k values as ratios of size
-        }
+        cout << "Size: " << size << endl;
+        vector<int> k_values = {1, size / 4, size / 2, 3 * size / 4, size-1}; // k values as ratios of size
+        vector<string> k_labels = {"1", "1/4", "1/2", "3/4", "4/4"}; // Corresponding labels
 
-        for(int k : k_values){
+        for(size_t i = 0; i < k_values.size(); i++){
+            int k = k_values[i];
+            string k_label = k_labels[i];
             vector<int> arr(size);
-            for(int i = 0; i < size; i++){
-                arr[i] = rand() % 10000; // Fill array with random values
+            for(int j = 0; j < size; j++){
+                arr[j] = rand() % 10000; // Fill array with random values
             }
             quick_select_comparison_count = 0; // Reset comparison count
+
+            auto start = chrono::high_resolution_clock::now();
             quick_select(arr, k);
-            outfile << size << "," << k << "," << quick_select_comparison_count << "\n";
+            auto end = chrono::high_resolution_clock::now();
+            chrono::duration<double> elapsed = end - start;
+
+            outfile << size << "," << k_label << "," << quick_select_comparison_count << "," << elapsed.count() << "\n";
             // print array
         }
     }
@@ -67,13 +76,14 @@ int quick_select_benchmark(){
 
 int lazy_select_benchmark(){
     vector<int> sizes;
-    for(int i = 1; i <= 10000; i += 100){
+    for(int i = 1000; i <= 500000; i += 2000){
         sizes.push_back(i);
     }
     ofstream outfile("Lazy_results.csv");
-    outfile << "ArraySize,K,Comparisons\n";
+    outfile << "ArraySize,K,Comparisons,Time\n";
 
     for(int size : sizes){
+        cout << "Size: " << size << endl;
         vector<int> k_values = {1, size / 4, size / 2, 3 * size / 4, size-1}; // k values as ratios of size
         vector<string> k_labels = {"1", "1/4", "1/2", "3/4", "4/4"}; // Corresponding labels
 
@@ -85,14 +95,18 @@ int lazy_select_benchmark(){
                 arr[j] = rand() % 10000; // Fill array with random values
             }
             lazy_select_comparison_count = 0; // Reset comparison count
+
+            auto start = chrono::high_resolution_clock::now();
             lazy_select(arr, k);
-            outfile << size << "," << k_label << "," << lazy_select_comparison_count << "\n";
+            auto end = chrono::high_resolution_clock::now();
+            chrono::duration<double> elapsed = end - start;
+
+            outfile << size << "," << k_label << "," << lazy_select_comparison_count << "," << elapsed.count() << "\n";
             // print array
         }
     }
     outfile.close();
     return 0;
-    
 }
 
 int quick_select(vector<int>& arr, int k){

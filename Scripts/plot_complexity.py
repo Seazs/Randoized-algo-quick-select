@@ -7,8 +7,10 @@ import numpy as np
 
 def main():
     # Get the file path from command line argument
-    file_path = sys.argv[1]
-    plot_lazy_data(file_path)
+    lazy_results_file_path = "Lazy_results.csv"
+    quick_select_results_file_path = "Quick_results.csv"
+    plot_lazy_data(lazy_results_file_path)
+    plot_quick_select_data(quick_select_results_file_path)
 
 
 # Define the function
@@ -17,7 +19,7 @@ def quick_select_theoretical_complexity(n, k):
     return 2 * n + 2 * k * np.log((n-k) / k) + 2 * n * np.log(n / (n - k))
 
 def lazy_complexity(n, k):
-    
+    return 2*n
 
 
 def plot_quick_select_data(file_path):
@@ -46,7 +48,7 @@ def plot_quick_select_data(file_path):
         plt.legend()
         plt.grid(True)
         plt.axis('equal')  # Set the axes to have the same scale
-        plt.show()
+    plt.show()
 
 
 def plot_lazy_data(file_path):
@@ -73,11 +75,11 @@ def plot_lazy_data(file_path):
 
         plt.xlabel('Array Size')
         plt.ylabel('Number of Comparisons')
-        plt.title(f'Quick Select Comparison Count vs Array Size (k={k})')
+        plt.title(f'Lazy Select Comparison Count vs Array Size (k={k})')
         plt.legend()
         plt.grid(True)
         plt.axis('equal')  # Set the axes to have the same scale
-        plt.show()
+    plt.show()
 
 
 
