@@ -10,7 +10,7 @@ using namespace std;
 
 int quick_select_benchmark(){
     std::vector<int> sizes;
-    for(int i = 1000; i <= 500000; i += 1000){
+    for(int i = 5000; i <= 500000; i += 5000){
         sizes.push_back(i);
     }
     std::ofstream outfile("Quick_results.csv");
@@ -24,18 +24,29 @@ int quick_select_benchmark(){
         for(size_t i = 0; i < k_values.size(); i++){
             int k = k_values[i];
             std::string k_label = k_labels[i];
-            std::vector<int> arr(size);
-            for(int j = 0; j < size; j++){
-                arr[j] = rand() % 10000;
+            double total_comparisons = 0;
+            double total_time = 0;
+
+            for (int run = 0; run < 5; run++) { // Run 5 times for each size
+                std::vector<int> arr(size);
+                for(int j = 0; j < size; j++){
+                    arr[j] = rand() % 10000;
+                }
+                quick_select_comparison_count = 0;
+
+                auto start = std::chrono::high_resolution_clock::now();
+                quick_select(arr, k);
+                auto end = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> elapsed = end - start;
+
+                total_comparisons += quick_select_comparison_count;
+                total_time += elapsed.count();
             }
-            quick_select_comparison_count = 0;
 
-            auto start = std::chrono::high_resolution_clock::now();
-            quick_select(arr, k);
-            auto end = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = end - start;
+            double mean_comparisons = total_comparisons / 5;
+            double mean_time = total_time / 5;
 
-            outfile << size << "," << k_label << "," << quick_select_comparison_count << "," << elapsed.count() << "\n";
+            outfile << size << "," << k_label << "," << mean_comparisons << "," << mean_time << "\n";
         }
     }
     outfile.close();
@@ -44,7 +55,7 @@ int quick_select_benchmark(){
 
 int lazy_select_benchmark(){
     vector<int> sizes;
-    for(int i = 1000; i <= 500000; i += 2000){
+    for(int i = 5000; i <= 500000; i += 5000){
         sizes.push_back(i);
     }
     ofstream outfile("Lazy_results.csv");
@@ -58,19 +69,29 @@ int lazy_select_benchmark(){
         for(size_t i = 0; i < k_values.size(); i++){
             int k = k_values[i];
             string k_label = k_labels[i];
-            vector<int> arr(size);
-            for(int j = 0; j < size; j++){
-                arr[j] = rand() % 10000; // Fill array with random values
+            double total_comparisons = 0;
+            double total_time = 0;
+
+            for (int run = 0; run < 5; run++) { // Run 5 times for each size
+                vector<int> arr(size);
+                for(int j = 0; j < size; j++){
+                    arr[j] = rand() % 10000; // Fill array with random values
+                }
+                lazy_select_comparison_count = 0; // Reset comparison count
+
+                auto start = chrono::high_resolution_clock::now();
+                lazy_select(arr, k);
+                auto end = chrono::high_resolution_clock::now();
+                chrono::duration<double> elapsed = end - start;
+
+                total_comparisons += lazy_select_comparison_count;
+                total_time += elapsed.count();
             }
-            lazy_select_comparison_count = 0; // Reset comparison count
 
-            auto start = chrono::high_resolution_clock::now();
-            lazy_select(arr, k);
-            auto end = chrono::high_resolution_clock::now();
-            chrono::duration<double> elapsed = end - start;
+            double mean_comparisons = total_comparisons / 5;
+            double mean_time = total_time / 5;
 
-            outfile << size << "," << k_label << "," << lazy_select_comparison_count << "," << elapsed.count() << "\n";
-            // print array
+            outfile << size << "," << k_label << "," << mean_comparisons << "," << mean_time << "\n";
         }
     }
     outfile.close();
