@@ -10,7 +10,7 @@ using namespace std;
 
 int quick_select_benchmark(){
     std::vector<int> sizes;
-    for(int i = 5000; i <= 500000; i += 5000){
+    for(int i = 1000; i <= 500000; i += 5000){
         sizes.push_back(i);
     }
     std::ofstream outfile("Quick_results.csv");
@@ -55,7 +55,7 @@ int quick_select_benchmark(){
 
 int lazy_select_benchmark(){
     vector<int> sizes;
-    for(int i = 5000; i <= 500000; i += 5000){
+    for(int i = 1000; i <= 500000; i += 5000){
         sizes.push_back(i);
     }
     ofstream outfile("Lazy_results.csv");

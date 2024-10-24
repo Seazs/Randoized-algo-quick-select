@@ -53,8 +53,7 @@ int lazy_select(vector<int>& arr, int k) {
 
         // 4. Select the relevant elements for P
         vector<int> P;
-        int type;
-        // Determine the type of P
+        // building P
         if (k < pow(n, 1.0 / 4.0)) {
             for (int y : arr) {
                 if (y <= b) P.push_back(y);
@@ -74,6 +73,7 @@ int lazy_select(vector<int>& arr, int k) {
             quick_sort(P, 0, P.size() - 1);
             int index = k - rank_a; // Adjusted index to find the k-th element
             index = max(0, index); // Ensure index is not negative
+            index = min(P.size() - 1, index); // Ensure index is not out of bounds
             return P[index];
         }
     }
